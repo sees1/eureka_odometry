@@ -1,15 +1,17 @@
 #include <eureka_odometry/eureka_odometry.hpp>
 #include <numeric>
 
+#define M_PI 3.14159265358979323846
+
 namespace eureka_odometry
 {
   
   EurekaOdometry::EurekaOdometry()
   : rclcpp::Node("eureka_odometry"),
     wheel_radius(0.11),
-    measure_error(0.15),
     wheel_base(0.795),
-    wheel_track(0.9)
+    wheel_track(0.9),
+    measure_error(0.15)
   {
     odometry_publisher = this->create_publisher<nav_msgs::msg::Odometry>(
     "/odometry", rclcpp::SystemDefaultsQoS());
@@ -30,13 +32,14 @@ namespace eureka_odometry
   void EurekaOdometry::joint_state_subscriber_callback(const sensor_msgs::msg::JointState::SharedPtr msg)
   {
     size_t joint_count = msg->name.size();
-    double steer_angle_accumulated = std::accumulate(msg->position.begin(), msg->position.end(), 0.0);
-    double steer_average_angle = steer_angle_accumulated / joint_count;
+    double steer_angle_deg_accumulated = std::accumulate(msg->position.begin(), msg->position.end(), 0.0);
+    double steer_average_angle_deg = steer_angle_deg_accumulated / joint_count;
+    double steer_average_angle_rad = steer_average_angle_deg * M_PI / 180.0;
     double wheel_angular_velocity_accumulated = std::accumulate(msg->velocity.begin(), msg->velocity.end(), 0.0);
     double wheel_average_angular_velocity = wheel_angular_velocity_accumulated / joint_count;
 
     double robot_linear_velocity = wheel_average_angular_velocity * (1 - measure_error) * wheel_radius;
-    double robot_angular_velocity = std::tan(steer_average_angle) * robot_linear_velocity / wheel_base;
+    double robot_angular_velocity = std::tan(steer_average_angle_rad) * robot_linear_velocity / wheel_base;
 
     odometry.update_open_loop(robot_linear_velocity, robot_angular_velocity, 0.01);
 
