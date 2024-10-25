@@ -10,28 +10,40 @@ namespace eureka_odometry
     wheel_radius(0.11),
     wheel_base(0.795),
     wheel_track(0.778),
-    measure_error(0.15)
+    measure_error(0.15),
+    current_roll(0.0),
+    current_pitch(0.0),
+    current_yaw(0.0)
   {
     odometry_publisher = this->create_publisher<nav_msgs::msg::Odometry>(
     "/odometry", rclcpp::SystemDefaultsQoS());
 
-    odometry_transform_publisher = this->create_publisher<tf2_msgs::msg::TFMessage>(
-    "/tf", rclcpp::SystemDefaultsQoS());
+    odometry_tf_publisher = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
  
     joint_state_sub = create_subscription<sensor_msgs::msg::JointState>(
       "/wheel_states",
       rclcpp::SensorDataQoS(),
       std::bind(&EurekaOdometry::joint_state_subscriber_callback, this, std::placeholders::_1));
 
-    tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
+    imu_subscriber = create_subscription<sensor_msgs::msg::Imu>(
+      "/camera/camera/imu",
+      rclcpp::SensorDataQoS(),
+      std::bind(&EurekaOdometry::imu_subscriber_callback, this, std::placeholders::_1));
+
     odometry.set_wheel_params(wheel_radius, wheel_base, wheel_track);
     odometry.init(this->now());
+  }
+
+  void EurekaOdometry::imu_subscriber_callback(const sensor_msgs::msg::Imu::SharedPtr msg)
+  {
+    tf2::fromMsg(msg->orientation, orientation);
+    orientation_matrix.setRotation(orientation);
+    orientation_matrix.getRPY(current_roll, current_pitch, current_yaw);
   }
 
 
   void EurekaOdometry::joint_state_subscriber_callback(const sensor_msgs::msg::JointState::SharedPtr msg)
   {
-    geometry_msgs::msg::TransformStamped t;
     size_t joint_count = msg->name.size();
 
     double steer_angle_deg_accumulated = msg->position[0] + msg->position[3] - msg->position[2] - msg->position[5]; 
@@ -56,11 +68,11 @@ namespace eureka_odometry
       robot_angular_velocity = 2 * std::tan(steer_average_angle_rad) * robot_linear_velocity / wheel_base;
       robot_linear_velocity = 0.0;
     }
-    
-    //TODO: add dt corresponding to the topic rate
-    odometry.update_open_loop(robot_linear_velocity, robot_angular_velocity, 0.05);
 
-    orientation.setRPY(0.0, 0.0, odometry.get_heading());
+    //TODO: add dt corresponding to the topic rate
+    odometry.update_open_loop(robot_linear_velocity, robot_angular_velocity, current_pitch, 0.05);
+
+    orientation.setRPY(current_roll, current_pitch, odometry.get_heading());
 
     odometry_msg.header.stamp = this->now();
     odometry_msg.pose.pose.position.x = odometry.get_x();
@@ -70,13 +82,13 @@ namespace eureka_odometry
     odometry_msg.twist.twist.angular.z = odometry.get_angular();
     odometry_publisher->publish(odometry_msg);
 
-    t.header.stamp = this->get_clock()->now();
-    t.header.frame_id="odom";
-    t.child_frame_id="base_link";
-    t.transform.translation.x=odometry.get_x();
-    t.transform.translation.y=odometry.get_y();
-    t.transform.translation.z=0.0;
-    t.transform.rotation=tf2::toMsg(orientation);
-    tf_broadcaster_->sendTransform(t);
+    transform_msg.header.stamp = this->get_clock()->now();
+    transform_msg.header.frame_id="odom";
+    transform_msg.child_frame_id="base_link";
+    transform_msg.transform.translation.x=odometry.get_x();
+    transform_msg.transform.translation.y=odometry.get_y();
+    transform_msg.transform.translation.z=0.0;
+    transform_msg.transform.rotation=tf2::toMsg(orientation);
+    odometry_tf_publisher->sendTransform(transform_msg);
   }
 } // namespace eureka_odometry
