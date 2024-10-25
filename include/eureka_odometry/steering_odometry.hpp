@@ -133,7 +133,7 @@ public:
    * \param omega_bz Angular velocity [rad/s]
    * \param dt      time difference to last call
    */
-  void update_open_loop(const double v_bx, const double omega_bz, const double dt);
+  void update_open_loop(const double v_bx, const double omega_bz, const double pitch, const double dt);
 
   /**
    * \brief Set odometry type
@@ -205,7 +205,7 @@ private:
    * \param omega_bz Angular velocity [rad/s]
    * \param dt      time difference to last call
    */
-  bool update_odometry(const double v_bx, const double omega_bz, const double dt);
+  // bool update_odometry(const double v_bx, const double omega_bz, const double pitch, const double dt);
 
   /**
    * \brief Integrates the velocities (linear and angular) using 2nd order Runge-Kutta
@@ -221,7 +221,7 @@ private:
    * \param omega_bz Angular velocity [rad/s]
    * \param dt time difference to last call
    */
-  void integrate_fk(const double v_bx, const double omega_bz, const double dt);
+  void integrate_fk(const double v_bx, const double omega_bz, const double pitch, const double dt);
 
   /**
    * \brief Calculates steering angle from the desired twist
@@ -251,6 +251,7 @@ private:
   /// Current pose:
   double x_;          //   [m]
   double y_;          //   [m]
+  double z_;          //   [m]
   double steer_pos_;  // [rad]
   double heading_;    // [rad]
 
