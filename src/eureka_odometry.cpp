@@ -42,7 +42,7 @@ namespace eureka_odometry
     double wheel_average_angular_velocity = wheel_angular_velocity_accumulated / joint_count;
 
     double robot_linear_velocity  = wheel_average_angular_velocity * (1 - measure_error) * wheel_radius;
-    double robot_angular_velocity = 2 * std::tan(steer_average_angle_rad) * robot_linear_velocity / wheel_base;
+    double robot_angular_velocity = std::tan(steer_average_angle_rad) * robot_linear_velocity / wheel_base;
 
     if (msg->position[0] < -30 && msg->position[3] > 30 &&
         msg->position[2] > 30  && msg->position[5] < -30)
