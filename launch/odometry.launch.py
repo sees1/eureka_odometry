@@ -6,14 +6,25 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
 
-  static_transform_pub = Node(
+  static_transform_pub_1 = Node(
     package='tf2_ros',
     executable='static_transform_publisher',
     name='base_link_to_camera_depth_optical',
     arguments=['0.43', '0', '0',
                 # the order is yaw, pitch, roll
                 '-3.14159265358979323846/2', '0', '-3.14159265358979323846/2',
-                'base_link', 'camera_depth_optical_frame'],
+                'base_link', 'camera_link'],
+    output='screen',
+  )
+
+  static_transform_pub_2 = Node(
+    package='tf2_ros',
+    executable='static_transform_publisher',
+    name='base_link_to_camera_depth_optical',
+    arguments=['0', '0', '0',
+                # the order is yaw, pitch, roll
+                '0', '0', '0',
+                'camera_link', 'camera_depth_optical_frame'],
     output='screen',
   )
 
@@ -24,6 +35,7 @@ def generate_launch_description():
   )
 
   ld = LaunchDescription()
-  ld.add_action(static_transform_pub)
+  ld.add_action(static_transform_pub_1)
+  ld.add_action(static_transform_pub_2)
   ld.add_action(eureka_odometry_node)
   return ld
