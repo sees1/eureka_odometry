@@ -233,7 +233,7 @@ void SteeringOdometry::integrate_runge_kutta_2(
 
 void SteeringOdometry::integrate_fk(const double v_bx, const double omega_bz, const double dt)
 {
-  const double delta_x_b = v_bx * dt;
+  const double delta_x_b   = v_bx * dt;
   const double delta_theta = omega_bz * dt;
 
   if (is_close_to_zero(delta_theta))
