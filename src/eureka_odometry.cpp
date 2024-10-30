@@ -26,7 +26,7 @@ namespace eureka_odometry
       std::bind(&EurekaOdometry::joint_state_subscriber_callback, this, std::placeholders::_1));
 
     imu_subscriber = create_subscription<sensor_msgs::msg::Imu>(
-      "/camera/camera/imu",
+      "/camera/camera/imu_with_quat",
       rclcpp::SensorDataQoS(),
       std::bind(&EurekaOdometry::imu_subscriber_callback, this, std::placeholders::_1));
 
