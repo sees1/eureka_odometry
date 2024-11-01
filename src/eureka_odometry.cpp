@@ -1,5 +1,6 @@
 #include <eureka_odometry/eureka_odometry.hpp>
 #include <numeric>
+#include <iostream>
 
 #define M_PI 3.14159265358979323846
 
@@ -26,7 +27,7 @@ namespace eureka_odometry
       std::bind(&EurekaOdometry::joint_state_subscriber_callback, this, std::placeholders::_1));
 
     imu_subscriber = create_subscription<sensor_msgs::msg::Imu>(
-      "/camera/camera/imu_with_quat",
+      "/imu/data",
       rclcpp::SensorDataQoS(),
       std::bind(&EurekaOdometry::imu_subscriber_callback, this, std::placeholders::_1));
 
