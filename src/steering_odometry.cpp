@@ -252,7 +252,7 @@ void SteeringOdometry::integrate_fk(const double v_bx, const double omega_bz, co
     const double R = delta_x_b / delta_theta;
     heading_ += delta_theta;
     double delta_x = R * (sin(heading_) - std::sin(heading_old)) * std::cos(pitch);
-    double delta_z = R * (sin(heading_) - std::sin(heading_old)) * std::sin(pitch); 
+    double delta_z = R * (sin(heading_) - std::sin(heading_old)) * (-1) * std::sin(pitch); 
     x_ += delta_x;
     z_ += delta_z;
     y_ += -R * (cos(heading_) - std::cos(heading_old));
