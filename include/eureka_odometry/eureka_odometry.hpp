@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <chrono>
 
 #include <rclcpp/rclcpp.hpp>
 
@@ -21,9 +22,13 @@
 
 namespace eureka_odometry
 {
+  using namespace std::literals::chrono_literals;
 
   class EurekaOdometry : public rclcpp::Node
   {
+  public:
+    using TimePoint = std::chrono::time_point<std::chrono::steady_clock>;
+
   public:
     EurekaOdometry();
 
@@ -32,13 +37,16 @@ namespace eureka_odometry
     void imu_subscriber_callback(const sensor_msgs::msg::Imu::SharedPtr msg);
 
   private:
-    // Odometry publishers
+    // Odometry publisher's
     rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odometry_publisher;
     std::unique_ptr<tf2_ros::TransformBroadcaster> odometry_tf_publisher;
 
-    // JointState subscriber
+    // Subscriber's
     rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_state_sub;
     rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_subscriber;
+
+    // Subscriber's parameter's
+    TimePoint last_time_point;
 
     double wheel_radius;
     double wheel_base;

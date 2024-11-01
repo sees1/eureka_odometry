@@ -5,6 +5,10 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 14)
+endif()
+
 # find dependencies
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   sensor_msgs

@@ -42,36 +42,45 @@ namespace eureka_odometry
     orientation_matrix.getRPY(current_roll, current_pitch, current_yaw);
   }
 
-
   void EurekaOdometry::joint_state_subscriber_callback(const sensor_msgs::msg::JointState::SharedPtr msg)
   {
     size_t joint_count = msg->name.size();
 
-    double steer_angle_deg_accumulated = msg->position[0] + msg->position[3] - msg->position[2] - msg->position[5]; 
-    double steer_average_angle_deg = steer_angle_deg_accumulated / 4;
-    double steer_average_angle_rad = steer_average_angle_deg * M_PI / 180.0;
+    double steer_angle_deg_accumulated, steer_average_angle_deg, steer_average_angle_rad;
+    double wheel_angular_velocity_accumulated, wheel_average_angular_velocity ;
+    double robot_linear_velocity, robot_angular_velocity;
 
-    double wheel_angular_velocity_accumulated =  msg->velocity[0] + msg->velocity[1] + msg->velocity[2] - msg->velocity[3] - msg->velocity[4] - msg->velocity[5];
-    double wheel_average_angular_velocity = wheel_angular_velocity_accumulated / joint_count;
-
-    double robot_linear_velocity  = wheel_average_angular_velocity * (1 - measure_error) * wheel_radius;
-    double robot_angular_velocity = std::tan(steer_average_angle_rad) * robot_linear_velocity / wheel_base;
-
-    if (msg->position[0] < -30 && msg->position[3] > 30 &&
-        msg->position[2] > 30  && msg->position[5] < -30)
+    if (msg->position[0] < -30 && msg->position[3] >  30 &&
+        msg->position[2] >  30 && msg->position[5] < -30)
     {
       steer_angle_deg_accumulated = msg->position[3] - msg->position[0] + msg->position[2] - msg->position[5];
       steer_average_angle_deg = steer_angle_deg_accumulated / 4.0;
-      steer_average_angle_rad = steer_average_angle_deg * M_PI / 180.0; 
+      steer_average_angle_rad = steer_average_angle_deg * M_PI / 180.0;
+
       wheel_angular_velocity_accumulated = msg->velocity[0] + msg->velocity[2] + msg->velocity[3] + msg->velocity[5];
       wheel_average_angular_velocity = -wheel_angular_velocity_accumulated / 4.0;
-      robot_linear_velocity = wheel_average_angular_velocity * (1 - measure_error) * wheel_radius;
-      robot_angular_velocity = 2 * std::tan(steer_average_angle_rad) * robot_linear_velocity / wheel_base;
+
+      robot_angular_velocity = 2 * std::tan(steer_average_angle_rad) * (wheel_average_angular_velocity * (1 - measure_error) * wheel_radius) / wheel_base;
       robot_linear_velocity = 0.0;
     }
+    else
+    {
+      steer_angle_deg_accumulated = msg->position[0] + msg->position[3] - msg->position[2] - msg->position[5]; 
+      steer_average_angle_deg = steer_angle_deg_accumulated / 4;
+      steer_average_angle_rad = steer_average_angle_deg * M_PI / 180.0;
 
-    //TODO: add dt corresponding to the topic rate
-    odometry.update_open_loop(robot_linear_velocity, robot_angular_velocity, current_pitch, 0.05);
+      wheel_angular_velocity_accumulated =  msg->velocity[0] + msg->velocity[1] + msg->velocity[2] - msg->velocity[3] - msg->velocity[4] - msg->velocity[5];
+      wheel_average_angular_velocity = wheel_angular_velocity_accumulated / joint_count;
+
+      robot_linear_velocity  = wheel_average_angular_velocity * (1 - measure_error) * wheel_radius;
+      robot_angular_velocity = std::tan(steer_average_angle_rad) * robot_linear_velocity / wheel_base;
+    }
+
+    // convert to duration in second's
+    double dt = (last_time_point - std::chrono::steady_clock::now()) / 1.0s;
+    last_time_point = std::chrono::steady_clock::now();
+    
+    odometry.update_open_loop(robot_linear_velocity, robot_angular_velocity, current_pitch, dt);
 
     orientation.setRPY(current_roll, current_pitch, odometry.get_heading());
 
