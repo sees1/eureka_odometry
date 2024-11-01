@@ -89,8 +89,6 @@ namespace eureka_odometry
     odometry_msg.pose.pose.position.y = odometry.get_y();
     odometry_msg.pose.pose.position.z = odometry.get_z();
     odometry_msg.pose.pose.orientation = tf2::toMsg(orientation);
-    odometry_msg.twist.twist.linear.x  = odometry.get_linear();
-    odometry_msg.twist.twist.angular.z = odometry.get_angular();
     odometry_publisher->publish(odometry_msg);
 
     transform_msg.header.stamp = this->get_clock()->now();
