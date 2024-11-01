@@ -160,6 +160,12 @@ public:
   double get_y() const { return y_; }
 
   /**
+   * \brief y position getter
+   * \return y position [m]
+   */
+  double get_z() const { return z_; }
+
+  /**
    * \brief linear velocity getter
    * \return linear velocity [m/s]
    */

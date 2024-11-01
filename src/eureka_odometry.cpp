@@ -78,17 +78,18 @@ namespace eureka_odometry
     odometry_msg.header.stamp = this->now();
     odometry_msg.pose.pose.position.x = odometry.get_x();
     odometry_msg.pose.pose.position.y = odometry.get_y();
+    odometry_msg.pose.pose.position.z = odometry.get_z();
     odometry_msg.pose.pose.orientation = tf2::toMsg(orientation);
-    odometry_msg.twist.twist.linear.x = odometry.get_linear();
+    odometry_msg.twist.twist.linear.x  = odometry.get_linear();
     odometry_msg.twist.twist.angular.z = odometry.get_angular();
     odometry_publisher->publish(odometry_msg);
 
     transform_msg.header.stamp = this->get_clock()->now();
-    transform_msg.header.frame_id="odom";
-    transform_msg.child_frame_id="base_link";
-    transform_msg.transform.translation.x=odometry.get_x();
-    transform_msg.transform.translation.y=odometry.get_y();
-    transform_msg.transform.translation.z=0.0;
+    transform_msg.header.frame_id = "odom";
+    transform_msg.child_frame_id  = "base_link";
+    transform_msg.transform.translation.x = odometry.get_x();
+    transform_msg.transform.translation.y = odometry.get_y();
+    transform_msg.transform.translation.z = odometry.get_z();
     transform_msg.transform.rotation=tf2::toMsg(orientation);
     odometry_tf_publisher->sendTransform(transform_msg);
   }
