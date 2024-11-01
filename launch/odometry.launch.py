@@ -12,14 +12,14 @@ def generate_launch_description():
     executable='static_transform_publisher',
     name='base_link_to_camera',
     arguments=['--x', '0.43',
-               '--y', '0.0',
-               '--z', '0.0',
-               '--qx',  '-0.500',
-               '--qy',  '0.500',
-               '--qz',  '-0.500',
-               '--qw',  ' 0.500',
+               '--y', '0.03',
+               '--z', '0.125',
+               '--qx',  '0.00',
+               '--qy',  '0.00',
+               '--qz',  '0.00',
+               '--qw',  ' 1.00',
                '--frame-id',       'base_link',
-               '--child-frame-id', 'camera_depth_optical_frame'
+               '--child-frame-id', 'camera_link'
               ],
     output='screen'
   )
