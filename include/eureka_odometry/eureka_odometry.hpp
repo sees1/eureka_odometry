@@ -20,6 +20,8 @@
 
 #include <eureka_odometry/steering_odometry.hpp>
 
+#include <rcppmath/rolling_mean_accumulator.hpp>
+
 namespace eureka_odometry
 {
   using namespace std::literals::chrono_literals;
@@ -64,6 +66,9 @@ namespace eureka_odometry
     double current_yaw;
 
     steering_odometry::SteeringOdometry odometry;
+
+    rcppmath::RollingMeanAccumulator<double> linear_acc_;
+    rcppmath::RollingMeanAccumulator<double> angular_acc_;
   };
 
 }  // namespace eureka_odometry

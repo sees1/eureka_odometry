@@ -14,7 +14,9 @@ namespace eureka_odometry
     measure_error(0.15),
     current_roll(0.0),
     current_pitch(0.0),
-    current_yaw(0.0)
+    current_yaw(0.0),
+    linear_acc_(10),
+    angular_acc_(10)
   {
     odometry_publisher = this->create_publisher<nav_msgs::msg::Odometry>(
     "/odometry", rclcpp::SystemDefaultsQoS());
@@ -76,6 +78,9 @@ namespace eureka_odometry
       robot_angular_velocity = std::tan(steer_average_angle_rad) * robot_linear_velocity / wheel_base;
     }
 
+    linear_acc_.accumulate(robot_linear_velocity);
+    angular_acc_.accumulate(robot_angular_velocity);
+
     // convert to duration in second's
     double dt = (last_time_point - std::chrono::steady_clock::now()) / 1.0s;
     last_time_point = std::chrono::steady_clock::now();
@@ -89,6 +94,8 @@ namespace eureka_odometry
     odometry_msg.pose.pose.position.y = odometry.get_y();
     odometry_msg.pose.pose.position.z = odometry.get_z();
     odometry_msg.pose.pose.orientation = tf2::toMsg(orientation);
+    odometry_msg.twist.twist.linear.x = linear_acc_.getRollingMean();
+    odometry_msg.twist.twist.angular.z = angular_acc_.getRollingMean();
     odometry_publisher->publish(odometry_msg);
 
     transform_msg.header.stamp = this->get_clock()->now();
