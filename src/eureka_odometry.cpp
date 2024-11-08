@@ -82,7 +82,7 @@ namespace eureka_odometry
     angular_acc_.accumulate(robot_angular_velocity);
 
     // convert to duration in second's
-    double dt = (last_time_point - std::chrono::steady_clock::now()) / 1.0s;
+    double dt = (std::chrono::steady_clock::now() - last_time_point) / 1.0s;
     last_time_point = std::chrono::steady_clock::now();
     
     odometry.update_open_loop(robot_linear_velocity, robot_angular_velocity, current_pitch, dt);
