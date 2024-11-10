@@ -6,7 +6,7 @@ from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch_ros.actions import Node
+from launch_ros.actions import Node, SetParameter
 
 def generate_launch_description():
 
@@ -40,8 +40,21 @@ def generate_launch_description():
     output='screen'
   )
 
+
+  ekf_for_odom = Node(
+            package='robot_localization',
+            executable='ekf_node',
+            name='ekf_filter_node',
+            output='screen',
+            parameters=[os.path.join(get_package_share_directory("eureka_odometry"), 'config', 'ekf.yaml')],
+  )
+
+  use_sim_time_param = SetParameter(name='use_sim_time', value=True)
+
   ld = LaunchDescription()
   ld.add_action(static_transform_pub_1)
   ld.add_action(imu_filter)
   ld.add_action(eureka_odometry_node)
+  ld.add_action(ekf_for_odom)
+  ld.add_action(use_sim_time_param)
   return ld
