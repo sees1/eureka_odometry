@@ -49,6 +49,10 @@ namespace eureka_odometry
 
     // Subscriber's parameter's
     TimePoint last_time_point;
+    bool enable_odom_tf;
+    std::string odometry_pub_topic;
+    std::string joint_sub_topic;
+    std::string imu_sub_topic;
 
     double wheel_radius;
     double wheel_base;
@@ -67,6 +71,7 @@ namespace eureka_odometry
 
     steering_odometry::SteeringOdometry odometry;
 
+    int velocity_rolling_window_size_;
     rcppmath::RollingMeanAccumulator<double> linear_acc_;
     rcppmath::RollingMeanAccumulator<double> angular_acc_;
   };

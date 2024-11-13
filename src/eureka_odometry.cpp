@@ -8,28 +8,34 @@ namespace eureka_odometry
 {
   EurekaOdometry::EurekaOdometry()
   : rclcpp::Node("eureka_odometry"),
-    wheel_radius(0.11),
-    wheel_base(0.795),
-    wheel_track(0.778),
-    measure_error(0.15),
     current_roll(0.0),
     current_pitch(0.0),
     current_yaw(0.0),
-    linear_acc_(10),
-    angular_acc_(10)
+    velocity_rolling_window_size_(10),
+    linear_acc_(velocity_rolling_window_size_),
+    angular_acc_(velocity_rolling_window_size_)
   {
-    odometry_publisher = this->create_publisher<nav_msgs::msg::Odometry>(
-    "~/odometry", rclcpp::SystemDefaultsQoS());
+    odometry_pub_topic = declare_parameter("odometry_pub_topic", "~/odometry");
+    joint_sub_topic = declare_parameter("joint_sub_topic", "/wheel_states");
+    imu_sub_topic = declare_parameter("imu_sub_topic", "/imu/data");
+
+    enable_odom_tf = declare_parameter("enable_odom_tf", true);
+    wheel_radius = declare_parameter("wheel_radius", 0.11);
+    wheel_base = declare_parameter("wheel_base", 0.795);
+    wheel_track = declare_parameter("wheel_track", 0.778);
+    measure_error = declare_parameter("measure_error", 0.15);
+
+    odometry_publisher = this->create_publisher<nav_msgs::msg::Odometry>(odometry_pub_topic, rclcpp::SystemDefaultsQoS());
 
     odometry_tf_publisher = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
  
     joint_state_sub = create_subscription<sensor_msgs::msg::JointState>(
-      "/wheel_states",
+      joint_sub_topic,
       rclcpp::SensorDataQoS(),
       std::bind(&EurekaOdometry::joint_state_subscriber_callback, this, std::placeholders::_1));
 
     imu_subscriber = create_subscription<sensor_msgs::msg::Imu>(
-      "/imu/data",
+      imu_sub_topic,
       rclcpp::SensorDataQoS(),
       std::bind(&EurekaOdometry::imu_subscriber_callback, this, std::placeholders::_1));
 
@@ -98,13 +104,16 @@ namespace eureka_odometry
     odometry_msg.twist.twist.angular.z = angular_acc_.getRollingMean();
     odometry_publisher->publish(odometry_msg);
 
-    transform_msg.header.stamp = this->get_clock()->now();
-    transform_msg.header.frame_id = "odom";
-    transform_msg.child_frame_id  = "base_link";
-    transform_msg.transform.translation.x = odometry.get_x();
-    transform_msg.transform.translation.y = odometry.get_y();
-    transform_msg.transform.translation.z = odometry.get_z();
-    transform_msg.transform.rotation=tf2::toMsg(orientation);
-    odometry_tf_publisher->sendTransform(transform_msg);
+    if(enable_odom_tf)
+    {
+      transform_msg.header.stamp = this->get_clock()->now();
+      transform_msg.header.frame_id = "odom";
+      transform_msg.child_frame_id  = "base_link";
+      transform_msg.transform.translation.x = odometry.get_x();
+      transform_msg.transform.translation.y = odometry.get_y();
+      transform_msg.transform.translation.z = odometry.get_z();
+      transform_msg.transform.rotation=tf2::toMsg(orientation);
+      odometry_tf_publisher->sendTransform(transform_msg);
+    }
   }
 } // namespace eureka_odometry
