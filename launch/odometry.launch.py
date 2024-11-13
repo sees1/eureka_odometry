@@ -22,7 +22,7 @@ def generate_launch_description():
                '--qy',  '0.00',
                '--qz',  '0.00',
                '--qw',  ' 1.00',
-               '--frame-id',       'base_link',
+               '--frame-id',       'base_footprint',
                '--child-frame-id', 'camera_link'
               ],
     output='screen'
@@ -44,7 +44,8 @@ def generate_launch_description():
   eureka_odometry_node = Node(
     package='eureka_odometry',
     executable='eureka_odometry',
-    output='screen'
+    output='screen',
+    parameters=[os.path.join(get_package_share_directory("eureka_odometry"), 'config', 'odometry.yaml')],
   )
 
 
