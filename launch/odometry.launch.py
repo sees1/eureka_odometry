@@ -28,12 +28,19 @@ def generate_launch_description():
     output='screen'
   )
 
-  imu_filter = IncludeLaunchDescription(
-                      PythonLaunchDescriptionSource([os.path.join(
-                        get_package_share_directory('imu_filter_madgwick'), 'launch', 'imu_filter.launch.py')
-                      ])
-  )
+  imu_config = os.path.join(get_package_share_directory('imu_filter_madgwick'), 'config')
 
+  imu_filter = Node(
+      package='imu_filter_madgwick',
+      executable='imu_filter_madgwick_node',
+      name='imu_filter',
+      output='screen',
+      parameters=[os.path.join(imu_config, 'imu_filter.yaml')],
+      remappings=[
+          ('imu/data_raw', 'camera/camera/imu')
+      ]
+  )
+  
   eureka_odometry_node = Node(
     package='eureka_odometry',
     executable='eureka_odometry',
