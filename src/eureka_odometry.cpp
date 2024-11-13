@@ -19,7 +19,7 @@ namespace eureka_odometry
     angular_acc_(10)
   {
     odometry_publisher = this->create_publisher<nav_msgs::msg::Odometry>(
-    "/odometry", rclcpp::SystemDefaultsQoS());
+    "~/odometry", rclcpp::SystemDefaultsQoS());
 
     odometry_tf_publisher = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
  
