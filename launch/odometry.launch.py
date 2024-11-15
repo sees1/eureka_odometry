@@ -40,13 +40,25 @@ def generate_launch_description():
           ('imu/data_raw', 'camera/camera/imu')
       ]
   )
+
+  imu_transformer = Node(
+      package='imu_transformer',
+      executable='imu_transformer_node',
+      name='imu_transformer_node',
+      parameters=[{'target_frame': 'base_link'}],
+      remappings=[
+          ('imu_in', 'imu/data'),
+          ('imu_out', 'imu/data/base')
+      ],
+      output='screen'
+  )
+
   
   eureka_odometry_node = Node(
     package='eureka_odometry',
     executable='eureka_odometry',
     output='screen'
   )
-
 
   ekf_for_odom = Node(
             package='robot_localization',
@@ -62,6 +74,7 @@ def generate_launch_description():
   ld.add_action(static_transform_pub_1)
   ld.add_action(imu_filter)
   ld.add_action(eureka_odometry_node)
+  ld.add_action(imu_transformer)
   ld.add_action(ekf_for_odom)
   ld.add_action(use_sim_time_param)
   return ld
