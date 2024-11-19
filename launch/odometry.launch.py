@@ -22,7 +22,7 @@ def generate_launch_description():
                '--qy',  '0.00',
                '--qz',  '0.00',
                '--qw',  ' 1.00',
-               '--frame-id',       'base_footprint',
+               '--frame-id',       'base_link',
                '--child-frame-id', 'camera_link'
               ],
     output='screen'
@@ -37,7 +37,7 @@ def generate_launch_description():
       output='screen',
       parameters=[os.path.join(imu_config, 'imu_filter.yaml')],
       remappings=[
-          ('imu/data_raw', 'camera/camera/imu')
+          ('/imu/data_raw', '/camera/camera/imu')
       ]
   )
 

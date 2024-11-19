@@ -7,4 +7,4 @@ eureka_odometry:
     wheel_radius: 0.11
     wheel_base: 0.795
     wheel_track: 0.778
-    measure_error: 0.15
+    measure_error: 0.0
