@@ -21,8 +21,8 @@ def generate_launch_description():
                '--qx',  '0.00',
                '--qy',  '0.00',
                '--qz',  '0.00',
-               '--qw',  ' 1.00',
-               '--frame-id',       'base_link',
+               '--qw',  ' 1.0',
+               '--frame-id',       'base_footprint',
                '--child-frame-id', 'camera_link'
               ],
     output='screen'
@@ -45,9 +45,9 @@ def generate_launch_description():
       package='imu_transformer',
       executable='imu_transformer_node',
       name='imu_transformer_node',
-      parameters=[{'target_frame': 'base_link'}],
+      parameters=[{'target_frame': 'base_footprint'}],
       remappings=[
-          ('imu_in', 'imu/data'),
+          ('imu_in', '/imu/data'),
           ('imu_out', 'imu/data/base')
       ],
       output='screen'
@@ -69,7 +69,7 @@ def generate_launch_description():
             parameters=[os.path.join(get_package_share_directory("eureka_odometry"), 'config', 'ekf.yaml')],
   )
 
-  use_sim_time_param = SetParameter(name='use_sim_time', value=True)
+  use_sim_time_param = SetParameter(name='use_sim_time', value=False)
 
   ld = LaunchDescription()
   ld.add_action(static_transform_pub_1)
