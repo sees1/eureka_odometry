@@ -21,8 +21,8 @@ namespace eureka_odometry
 
     enable_odom_tf = declare_parameter("enable_odom_tf", true);
     wheel_radius = declare_parameter("wheel_radius", 0.11);
-    wheel_base = declare_parameter("wheel_base", 0.795);
-    wheel_track = declare_parameter("wheel_track", 0.778);
+    wheel_base = declare_parameter("wheel_base", 0.83);
+    wheel_track = declare_parameter("wheel_track", 0.8);
     measure_error = declare_parameter("measure_error", 0.15);
 
     odometry_publisher = this->create_publisher<nav_msgs::msg::Odometry>(odometry_pub_topic, rclcpp::SystemDefaultsQoS());

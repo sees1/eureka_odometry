@@ -22,37 +22,11 @@ def generate_launch_description():
                '--qy',  '0.00',
                '--qz',  '0.00',
                '--qw',  ' 1.0',
-               '--frame-id',       'base_footprint',
+               '--frame-id',       'base_link',
                '--child-frame-id', 'camera_link'
               ],
     output='screen'
   )
-
-  imu_config = os.path.join(get_package_share_directory('imu_filter_madgwick'), 'config')
-
-  imu_filter = Node(
-      package='imu_filter_madgwick',
-      executable='imu_filter_madgwick_node',
-      name='imu_filter',
-      output='screen',
-      parameters=[os.path.join(imu_config, 'imu_filter.yaml')],
-      remappings=[
-          ('/imu/data_raw', '/camera/camera/imu')
-      ]
-  )
-
-  imu_transformer = Node(
-      package='imu_transformer',
-      executable='imu_transformer_node',
-      name='imu_transformer_node',
-      parameters=[{'target_frame': 'base_footprint'}],
-      remappings=[
-          ('imu_in', '/imu/data'),
-          ('imu_out', 'imu/data/base')
-      ],
-      output='screen'
-  )
-
   
   eureka_odometry_node = Node(
     package='eureka_odometry',
@@ -73,9 +47,7 @@ def generate_launch_description():
 
   ld = LaunchDescription()
   ld.add_action(static_transform_pub_1)
-  ld.add_action(imu_filter)
   ld.add_action(eureka_odometry_node)
-  ld.add_action(imu_transformer)
-  ld.add_action(ekf_for_odom)
+  #ld.add_action(ekf_for_odom)
   ld.add_action(use_sim_time_param)
   return ld

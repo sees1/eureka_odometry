@@ -3,7 +3,7 @@ eureka_odometry:
     odometry_pub_topic: "~/odometry"
     joint_sub_topic: "/wheel_states"
     imu_sub_topic: "/imu/data"
-    enable_odom_tf: false
+    enable_odom_tf: true
     wheel_radius: 0.11
     wheel_base: 0.795
     wheel_track: 0.778
