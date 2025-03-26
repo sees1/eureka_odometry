@@ -16,6 +16,7 @@ namespace eureka_odometry
     angular_acc_(velocity_rolling_window_size_)
   {
     odometry_pub_topic = declare_parameter("odometry_pub_topic", "~/odometry");
+    twist_pub_topic = declare_parameter("twist_pub_topic", "~/twist_stamped");
     joint_sub_topic = declare_parameter("joint_sub_topic", "/wheel_states");
     imu_sub_topic = declare_parameter("imu_sub_topic", "/imu/data");
 
@@ -25,7 +26,8 @@ namespace eureka_odometry
     wheel_track = declare_parameter("wheel_track", 0.8);
     measure_error = declare_parameter("measure_error", 0.15);
 
-    odometry_publisher = this->create_publisher<nav_msgs::msg::Odometry>(odometry_pub_topic, rclcpp::SystemDefaultsQoS());
+    odometry_publisher = create_publisher<nav_msgs::msg::Odometry>(odometry_pub_topic, rclcpp::SystemDefaultsQoS());
+    twist_publisher = create_publisher<geometry_msgs::msg::TwistStamped>(twist_pub_topic, rclcpp::SystemDefaultsQoS());
 
     odometry_tf_publisher = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
  
@@ -52,7 +54,7 @@ namespace eureka_odometry
 
   void EurekaOdometry::joint_state_subscriber_callback(const sensor_msgs::msg::JointState::SharedPtr msg)
   {
-    size_t joint_count = msg->name.size();
+    size_t joint_count = 4;
 
     double steer_angle_deg_accumulated, steer_average_angle_deg, steer_average_angle_rad;
     double wheel_angular_velocity_accumulated, wheel_average_angular_velocity ;
@@ -73,23 +75,19 @@ namespace eureka_odometry
     }
     else
     {
-      double steer_angle_inside_deg;
-      if(std::abs(msg->position[0]) < std::abs(msg->position[3]))
-      {
-        steer_angle_inside_deg = (msg->position[3] - msg->position[5]) / 2.0;
-      }
-      else
-      {
-        steer_angle_inside_deg = (msg->position[0] - msg->position[2]) / 2.0;
-      }
+      steer_angle_deg_accumulated = msg->position[0] + msg->position[3] - msg->position[2] - msg->position[5]; 
 
-      steer_angle_inside_rad = steer_angle_inside_deg * M_PI / 180.0;
+      steer_average_angle_deg = steer_angle_deg_accumulated / 4;
+
+      steer_average_angle_rad = steer_average_angle_deg * M_PI / 180.0;
+
 
       wheel_angular_velocity_accumulated =  msg->velocity[0] + msg->velocity[2] - msg->velocity[3] - msg->velocity[5];
-      wheel_average_angular_velocity = wheel_angular_velocity_accumulated / 4;
+
+      wheel_average_angular_velocity = wheel_angular_velocity_accumulated / joint_count;
 
       robot_linear_velocity  = wheel_average_angular_velocity * (1 - measure_error) * wheel_radius;
-      robot_angular_velocity = std::tan(steer_angle_inside_rad) * robot_linear_velocity / wheel_base;
+      robot_angular_velocity = 2 * std::tan(steer_average_angle_rad) * robot_linear_velocity / wheel_base;
     }
 
     linear_acc_.accumulate(robot_linear_velocity);
@@ -111,6 +109,11 @@ namespace eureka_odometry
     odometry_msg.twist.twist.linear.x = linear_acc_.getRollingMean();
     odometry_msg.twist.twist.angular.z = angular_acc_.getRollingMean();
     odometry_publisher->publish(odometry_msg);
+
+    twist_msg.header.stamp = odometry_msg.header.stamp;
+    twist_msg.twist.linear.x = odometry_msg.twist.twist.linear.x;
+    twist_msg.twist.angular.z = odometry_msg.twist.twist.angular.z;
+    twist_publisher->publish(twist_msg);
 
     if(enable_odom_tf)
     {

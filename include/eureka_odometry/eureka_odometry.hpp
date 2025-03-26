@@ -6,6 +6,7 @@
 #include <rclcpp/rclcpp.hpp>
 
 #include <nav_msgs/msg/odometry.hpp>
+#include <geometry_msgs/msg/twist_stamped.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <sensor_msgs/msg/imu.hpp>
 
@@ -41,6 +42,7 @@ namespace eureka_odometry
   private:
     // Odometry publisher's
     rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odometry_publisher;
+    rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr twist_publisher;
     std::unique_ptr<tf2_ros::TransformBroadcaster> odometry_tf_publisher;
 
     // Subscriber's
@@ -51,6 +53,7 @@ namespace eureka_odometry
     TimePoint last_time_point;
     bool enable_odom_tf;
     std::string odometry_pub_topic;
+    std::string twist_pub_topic;
     std::string joint_sub_topic;
     std::string imu_sub_topic;
 
@@ -60,6 +63,7 @@ namespace eureka_odometry
     double measure_error;
 
     nav_msgs::msg::Odometry odometry_msg;
+    geometry_msgs::msg::TwistStamped twist_msg;
     geometry_msgs::msg::TransformStamped transform_msg;
 
     tf2::Quaternion orientation;
