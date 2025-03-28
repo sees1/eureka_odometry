@@ -21,10 +21,10 @@ namespace eureka_odometry
     imu_sub_topic = declare_parameter("imu_sub_topic", "/imu/data");
 
     enable_odom_tf = declare_parameter("enable_odom_tf", true);
-    wheel_radius = declare_parameter("wheel_radius", 0.11);
-    wheel_base = declare_parameter("wheel_base", 0.83);
-    wheel_track = declare_parameter("wheel_track", 0.8);
-    measure_error = declare_parameter("measure_error", 0.15);
+    wheel_radius = declare_parameter("wheel_radius", 0.29);
+    wheel_base = declare_parameter("wheel_base", 0.71);
+    wheel_track = declare_parameter("wheel_track", 0.951);
+    measure_error = declare_parameter("measure_error", 0.05);
 
     odometry_publisher = create_publisher<nav_msgs::msg::Odometry>(odometry_pub_topic, rclcpp::SystemDefaultsQoS());
     twist_publisher = create_publisher<geometry_msgs::msg::TwistStamped>(twist_pub_topic, rclcpp::SystemDefaultsQoS());
